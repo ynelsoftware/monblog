@@ -1,14 +1,18 @@
 package es.ynel.monblog.repository.custom;
 
 import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Iterator;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.mapreduce.MapReduceResults;
 
 import es.ynel.monblog.model.BlogPost;
 import es.ynel.monblog.model.BlogTag;
 import es.ynel.monblog.repository.BlogPostRepository;
+import es.ynel.monblog.repository.BlogTagRepository;
 
 public class BlogPostRepositoryImpl implements BlogPostRepositoryCustom {
 
@@ -18,13 +22,23 @@ public class BlogPostRepositoryImpl implements BlogPostRepositoryCustom {
 	@Autowired
 	private BlogPostRepository blogPostRepository;
 	
+	@Autowired
+	private BlogTagRepository blogTagRepository;
+	
 	@Override
 	public BlogPost createBlogPost(BlogPost blogPost)
 	{
 		String alias = cleanAliasString(blogPost.getTitle());
+		
+		if (blogPost.getPublished() == null)
+		{
+			blogPost.setPublished(new Date());
+		}
+		
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
 		String date = sdf.format(blogPost.getPublished());
 		blogPost.setLink(date + "/" + alias);
+		
 		mongoOperations.save(blogPost);
 		mapReduceTags();
 		return blogPost;
@@ -32,7 +46,15 @@ public class BlogPostRepositoryImpl implements BlogPostRepositoryCustom {
 	
 	private void mapReduceTags()
 	{
-		mongoOperations.mapReduce(mongoOperations.getCollectionName(BlogPost.class), "classpath:es/ynel/monblog/repository/blogtagMap.js", "classpath:es/ynel/monblog/repository/blogtagReduce.js", BlogTag.class);
+		final MapReduceResults<BlogTag> results = mongoOperations.mapReduce(mongoOperations.getCollectionName(BlogPost.class), "classpath:es/ynel/monblog/repository/blogtagMap.js", "classpath:es/ynel/monblog/repository/blogtagReduce.js", BlogTag.class);
+		blogTagRepository.save(new Iterable<BlogTag>() {
+
+			@Override
+			public Iterator<BlogTag> iterator()
+			{
+				return results.iterator();
+			}
+		});
 	}
 
 	private String cleanAliasString(String alias)

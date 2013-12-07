@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.Set;
 
 import org.bson.types.ObjectId;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -15,19 +16,29 @@ public class BlogPost {
 	@Id
 	private ObjectId id;
 	
+	@NotEmpty
 	private String title;
 	private Date published;
+	@NotEmpty
 	private String publisher;
 	
 	@Indexed
 	private String link;
+	@NotEmpty
 	private String content;
 	
 	@Indexed
+	@NotEmpty
 	private Set<String> tags;
 	
 	private long comments;
 	private long commentPages;
+	
+	/**
+	 * @since 0.6.0
+	 * Indicates the post format, e.g. HTML, Markup, ...
+	 */
+	private String format; 
 	
 	public ObjectId getId()
 	{
@@ -100,5 +111,13 @@ public class BlogPost {
 	public void setComments(long commments)
 	{
 		this.comments = commments;
+	}
+	public String getFormat()
+	{
+		return format;
+	}
+	public void setFormat(String format)
+	{
+		this.format = format;
 	}
 }

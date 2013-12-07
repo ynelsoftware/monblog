@@ -10,8 +10,23 @@
 		<function-signature>java.util.List getBlogTags()</function-signature>
 	</function>
 	<function>
-		<name>getBlogEntries</name>
+		<name>getPopularBlogTags</name>
 		<function-class>es.ynel.monblog.web.BlogJSPFunctions</function-class>
-		<function-signature>java.util.List getBlogEntries(int)</function-signature>
+		<function-signature>java.util.List getPopularBlogTags(int)</function-signature>
+	</function>
+	<function>
+		<name>getLastBlogPosts</name>
+		<function-class>es.ynel.monblog.web.BlogJSPFunctions</function-class>
+		<function-signature>java.util.List getLastBlogPosts(int)</function-signature>
+	</function>
+	<function>
+		<name>getAllBlogTags</name>
+		<function-class>es.ynel.monblog.web.BlogJSPFunctions</function-class>
+		<function-signature>java.lang.Iterable getAllBlogTags()</function-signature>
+	</function>
+	<function>
+		<name>parseMarkDown</name>
+		<function-class>es.ynel.monblog.web.BlogJSPFunctions</function-class>
+		<function-signature>java.lang.String parseMarkDown(java.lang.String)</function-signature>
 	</function>
 </taglib>

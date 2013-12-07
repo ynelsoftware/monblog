@@ -23,8 +23,10 @@ import es.ynel.monblog.controller.bean.CommentBean;
 import es.ynel.monblog.controller.bean.Pagination;
 import es.ynel.monblog.model.BlogComment;
 import es.ynel.monblog.model.BlogPost;
+import es.ynel.monblog.model.BlogTag;
 import es.ynel.monblog.repository.BlogCommentRepository;
 import es.ynel.monblog.repository.BlogPostRepository;
+import es.ynel.monblog.repository.BlogTagRepository;
 
 @Controller
 @RequestMapping("/blog")
@@ -35,6 +37,9 @@ public class BlogController {
 	
 	@Autowired
 	private BlogCommentRepository blogCommentRepository;
+	
+	@Autowired
+	private BlogTagRepository blogTagRepository;
 	
 	@Autowired
 	private PostBlogControllerActions actions;
@@ -155,5 +160,36 @@ public class BlogController {
 		}
 		
 		return new ModelAndView("blog/index", "model", model);
+	}
+	
+	/**
+	 * @since 0.6.0
+	 */
+	@RequestMapping(value = "/addPost")
+	public ModelAndView createBlogPost(ModelMap model)
+	{
+		if (!model.containsKey("blogPost"))
+		{
+			model.addAttribute(new BlogPost());
+		}
+		
+		Iterable<BlogTag> tags = blogTagRepository.findAll(new Sort(new Sort.Order(Direction.ASC, "id")));
+		model.put("tags", tags);
+		return new ModelAndView("blog/addPost", "model", model);
+	}
+	
+	/**
+	 * @since 0.6.0
+	 */
+	@RequestMapping(value = "/addPost", method = RequestMethod.POST)
+	public ModelAndView createBlogPost(@Valid BlogPost blogPost, BindingResult result, ModelMap model)
+	{
+		if (result.hasErrors())
+		{
+			return createBlogPost(model);
+		}
+		
+		blogPost = blogPostRepository.createBlogPost(blogPost);
+		return new ModelAndView("redirect:/blog/" + blogPost.getLink());
 	}
 }

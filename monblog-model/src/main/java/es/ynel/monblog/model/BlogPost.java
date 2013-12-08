@@ -36,6 +36,11 @@ public class BlogPost {
 	
 	/**
 	 * @since 0.6.0
+	 */
+	private long visits;
+	
+	/**
+	 * @since 0.6.0
 	 * Indicates the post format, e.g. HTML, Markup, ...
 	 */
 	private String format; 
@@ -119,5 +124,13 @@ public class BlogPost {
 	public void setFormat(String format)
 	{
 		this.format = format;
+	}
+	public long getVisits()
+	{
+		return visits;
+	}
+	public void setVisits(long visits)
+	{
+		this.visits = visits;
 	}
 }

@@ -8,6 +8,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.mapreduce.MapReduceResults;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 
 import es.ynel.monblog.model.BlogPost;
 import es.ynel.monblog.model.BlogTag;
@@ -67,5 +70,17 @@ public class BlogPostRepositoryImpl implements BlogPostRepositoryCustom {
 		alias = alias.toLowerCase();
 		alias = alias.replaceAll("\\s", "-");
 		return alias;
+	}
+
+	/* (non-Javadoc)
+	 * @see es.ynel.monblog.repository.custom.BlogPostRepositoryCustom#addVisit(java.lang.String)
+	 */
+	@Override
+	public BlogPost addVisit(String link)
+	{
+		Query query = new Query(Criteria.where("link").is(link));
+        Update update = new Update().inc("visits", 1);
+        BlogPost blogPost = mongoOperations.findAndModify(query, update, BlogPost.class);
+        return blogPost;
 	}
 }

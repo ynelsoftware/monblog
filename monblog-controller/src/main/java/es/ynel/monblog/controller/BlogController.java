@@ -76,7 +76,7 @@ public class BlogController {
 	@RequestMapping(value = "/{year}/{month}/{day}/{alias}")
 	public ModelAndView showBlogPost(@PathVariable("day") String day, @PathVariable("month") String month, @PathVariable("year") String year, @PathVariable("alias") String alias, ModelMap model) throws NoSuchRequestHandlingMethodException
 	{
-		BlogPost blogPost = getBlogPost(day, month, year, alias);
+		BlogPost blogPost = getBlogPost(day, month, year, alias, true);
 		
 		BlogComment blogComment = blogCommentRepository.findByBlogPostIdAndPage(blogPost.getId(), 1);
 		
@@ -96,10 +96,10 @@ public class BlogController {
 		return new ModelAndView("blog/post", "model", model);
 	}
 
-	private BlogPost getBlogPost(String day, String month, String year, String alias) throws NoSuchRequestHandlingMethodException
+	private BlogPost getBlogPost(String day, String month, String year, String alias, boolean addVisit) throws NoSuchRequestHandlingMethodException
 	{
 		String link = year + "/" + month + "/" + day + "/" + alias;
-		BlogPost blog = blogPostRepository.findByLink(link);
+		BlogPost blog = (addVisit ? blogPostRepository.addVisit(link) : blogPostRepository.findByLink(link));
 		
 		if (blog == null)
 		{
@@ -111,7 +111,7 @@ public class BlogController {
 	@RequestMapping(value = "/{year}/{month}/{day}/{alias}/comment", method = RequestMethod.POST)
 	public ModelAndView commentPost(@PathVariable("day") String day, @PathVariable("month") String month, @PathVariable("year") String year, @PathVariable("alias") String alias, ModelMap model, @Valid CommentBean commentBean, BindingResult result, RedirectAttributes redirectAttributes) throws NoSuchRequestHandlingMethodException
 	{
-		BlogPost blog = getBlogPost(day, month, year, alias);
+		BlogPost blog = getBlogPost(day, month, year, alias, false);
 		
 		RedirectView view = new RedirectView("/blog/" + year +"/" + month + "/" + day + "/" + alias, true);
 		view.setExposeModelAttributes(false);
@@ -179,10 +179,11 @@ public class BlogController {
 	}
 	
 	/**
+	 * @throws Exception 
 	 * @since 0.6.0
 	 */
 	@RequestMapping(value = "/addPost", method = RequestMethod.POST)
-	public ModelAndView createBlogPost(@Valid BlogPost blogPost, BindingResult result, ModelMap model)
+	public ModelAndView createBlogPost(@Valid BlogPost blogPost, BindingResult result, ModelMap model) throws Exception
 	{
 		if (result.hasErrors())
 		{
@@ -190,6 +191,19 @@ public class BlogController {
 		}
 		
 		blogPost = blogPostRepository.createBlogPost(blogPost);
+		
+		if (actions != null)
+		{
+			try
+			{
+				actions.postCreateBlogPost(blogPost);
+			}
+			catch (Exception e)
+			{
+				throw e;
+			}
+		}
+		
 		return new ModelAndView("redirect:/blog/" + blogPost.getLink());
 	}
 }

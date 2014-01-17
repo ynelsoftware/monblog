@@ -41,7 +41,7 @@ public class BlogController {
 	@Autowired
 	private BlogTagRepository blogTagRepository;
 	
-	@Autowired
+	@Autowired(required=false)
 	private PostBlogControllerActions actions;
 	
 	@RequestMapping
